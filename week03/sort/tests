@@ -1,0 +1,30 @@
+RANDOM:
+➙  time ./sort1 random50000.txt >> /dev/null
+4.06s user 0.00s system 98% cpu 4.113 total
+
+➙  time ./sort2 random50000.txt >> /dev/null
+0.01s user 0.00s system 98% cpu 0.012 total
+
+➙  time ./sort3 random50000.txt >> /dev/null
+1.31s user 0.00s system 99% cpu 1.310 total
+
+
+
+REVERSED:
+➙  time ./sort1 reversed50000.txt >> /dev/null
+3.49s user 0.00s system 99% cpu 3.505 total
+➙  time ./sort2 reversed50000.txt >> /dev/null
+0.01s user 0.00s system 95% cpu 0.008 total
+➙  time ./sort3 reversed50000.txt >> /dev/null
+1.49s user 0.00s system 99% cpu 1.492 total
+
+
+
+SORTED:
+➙  time ./sort1 sorted50000.txt >> /dev/null
+0.01s user 0.00s system 95% cpu 0.006 total
+➙  time ./sort2 sorted50000.txt >> /dev/null
+0.01s user 0.00s system 97% cpu 0.009 total
+➙  time ./sort3 sorted50000.txt >> /dev/null
+1.38s user 0.00s system 99% cpu 1.381 total
+
