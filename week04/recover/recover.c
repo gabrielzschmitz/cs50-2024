@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 
   while (fread(&buffer, 512, 1, image) == 1) {
     if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff &&
-        (buffer[3] >= 0xe0 || buffer[3] <= 0xef)) {
+        (buffer[3] >= 0xe0 && buffer[3] <= 0xef)) {
       if (!(recoveredImages == 0)) fclose(imagePointer);
       sprintf(fileName, "%03i.jpg", recoveredImages);
       imagePointer = fopen(fileName, "w");
