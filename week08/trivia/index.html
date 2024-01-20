@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
+        <link href="styles.css" rel="stylesheet">
+        <title>Trivia!</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Multiple Choice Section
+                let multipleChoiceSection = document.getElementById('multipleChoiceSection');
+                multipleChoiceSection.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('incorrect')) {
+                        event.target.style.backgroundColor = 'red';
+                        document.querySelector('#feedback-1').innerHTML = 'Incorrect';
+                    } else if (event.target.classList.contains('correct')) {
+                        event.target.style.backgroundColor = 'green';
+                        document.querySelector('#feedback-1').innerHTML = 'Correct!';
+                    }
+                });
+
+                // Free Response Section
+                document.getElementById('freeResponseForm').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    let input = document.getElementById('freeResponseInput');
+                    let comment = document.getElementById('feedback-2');
+
+                    if (input.value.trim().toLowerCase() === 'leonardo da vinci') {
+                        input.style.backgroundColor = 'green';
+                        comment.innerHTML = 'Correct!';
+                    } else {
+                        input.style.backgroundColor = 'red';
+                        comment.innerHTML = 'Incorrect!';
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Trivia!</h1>
+        </div>
+
+        <div class="container">
+            <div class="section" id="multipleChoiceSection">
+                <h2>Part 1: Multiple Choice </h2>
+                <hr>
+
+                <!-- 1997 -->
+                <h3>
+                  What year was the movie Titanic released?
+                </h3>
+                <button class="incorrect" type="submit">1991</button>
+                <button class="incorrect" type="submit">1984</button>
+                <button class="correct"   type="submit">1997</button>
+                <button class="incorrect" type="submit">1999</button>
+                <button class="incorrect" type="submit">2001</button>
+                <p id="feedback-1"></p>
+
+            </div>
+
+            <div class="section" id="freeResponseSection">
+                <h2>Part 2: Free Response</h2>
+                <hr>
+
+                <!-- Leonardo da Vinci -->
+                <h3>
+                    Who painted the Mona Lisa?
+                </h3>
+                <form id="freeResponseForm">
+                    <input type="text" id="freeResponseInput">
+                    <button type="submit" id="freeResponseSubmit">Check Answer</button>
+                </form>
+                <p id="feedback-2"></p>
+
+            </div>
+        </div>
+    </body>
+</html>
