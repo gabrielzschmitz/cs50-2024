@@ -37,7 +37,7 @@ def index():
     """Show portfolio of stocks"""
     user_id = session["user_id"]
     stocks = db.execute(
-        "SELECT symbol, price, SUM(shares) as total_shares FROM transactions WHERE user_id = ? GROUP BY symbol",
+        "SELECT symbol, price, SUM(shares) as total_shares FROM transactions WHERE user_id = ? GROUP BY symbol HAVING SUM(shares) >= 1;",
         user_id,
     )
     cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]["cash"]
@@ -45,9 +45,7 @@ def index():
     total = cash
     for stock in stocks:
         total += stock["price"] * stock["total_shares"]
-    return render_template(
-        "index.html", stocks=stocks, cash=usd(cash), total=usd(total)
-    )
+    return render_template("index.html", stocks=stocks, cash=cash, total=total, usd=usd)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -55,20 +53,20 @@ def index():
 def buy():
     """Buy shares of stock"""
     if request.method == "POST":
-        symbol = request.form.get("symbol").upper()
-        if not symbol:
+        symbol = request.form.get("symbol")
+        if symbol is None:
             return apology("Please enter a symbol")
+        symbol = symbol.upper()
+
         item = lookup(symbol)
-        if not item:
+        if item is None:
             return apology("Invalid symbol")
 
-        try:
-            shares = int(request.form.get("shares"))
-        except Exception:
-            return apology("Shares must be a number")
+        shares_str = request.form.get("shares")
+        if not shares_str or not shares_str.isdigit():
+            return apology("Shares must be a positive integer!")
 
-        if shares <= 0:
-            return apology("Shares must be a positive number")
+        shares = int(shares_str)
 
         user_id = session["user_id"]
         cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]["cash"]
@@ -219,19 +217,32 @@ def sell():
     user_id = session["user_id"]
     if request.method == "POST":
         symbol = request.form.get("symbol")
-        shares = int(request.form.get("shares"))
+        shares_str = request.form.get("shares")
+        if not shares_str or not shares_str.isdigit():
+            return apology("Shares must be a positive integer!")
 
+        shares = int(shares_str)
         if shares <= 0:
             return apology("Shares must be a positive number!")
-        item_price = lookup(symbol)["price"]
-        item_symbol = lookup(symbol)["symbol"]
+
+        result = lookup(symbol)
+        if result is None:
+            return apology("Invalid symbol")
+
+        item_price = result["price"]
+        item_symbol = result["symbol"]
 
         shares_owned = db.execute(
-            "SELECT shares FROM transactions WHERE user_id = ? AND symbol = ? GROUP BY symbol",
+            "SELECT SUM(shares) FROM transactions WHERE user_id = ? AND symbol = ?",
             user_id,
             symbol,
-        )[0]["shares"]
+        )[0]["SUM(shares)"]
+        print(shares_owned)
+        print(shares)
         if shares_owned < shares:
+            return apology("Not enough shares")
+
+        if (shares_owned - shares) < 0:
             return apology("Not enough shares")
 
         price = shares * item_price
@@ -255,4 +266,7 @@ def sell():
             "SELECT symbol FROM transactions WHERE user_id = ? GROUP BY symbol",
             user_id,
         )
-        return render_template("sell.html", symbols=symbols)
+        return render_template(
+            "sell.html",
+            symbols=symbols,
+        )
