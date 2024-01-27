@@ -1,18 +1,46 @@
-// Simulate genetic inheritance of blood type
+/*
+  Program Description:
+  --------------------
+  This C program, named inheritance.c, simulates the inheritance of blood types
+  for each member of a family over multiple generations. The program models the
+  random passing of alleles from parents to children, considering the possible
+  blood type combinations: OO, OA, OB, AO, AA, AB, BO, BA, and BB.
 
+  Implementation Details:
+  -----------------------
+  - The program defines a structure called "person," representing an individual
+  in the family. Each person has two parents and two alleles (blood type genes).
+  - The function create_family(generations) dynamically allocates memory for a
+  person and recursively creates a family tree with specified generations. It
+  randomly assigns alleles for each person based on the alleles of their
+  parents.
+  - The function free_family(p) frees the dynamically allocated memory for the
+  family tree.
+  - The function print_family(p, generation) recursively prints the family tree,
+  displaying each person's blood type and generation.
+  - The main function initializes the random seed, creates a family with three
+  generations, prints the family tree, and frees the allocated memory.
+
+  Usage:
+  ------
+  To use the program, compile the source code and execute the resulting
+  executable. The program will simulate the inheritance of blood types in a
+  family tree and display the results.
+
+  Note: Ensure proper compilation and execution for the desired functionality.
+*/
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-// Each person has two parents and two alleles
+#define GENERATIONS   3
+#define INDENT_LENGTH 4
+
 typedef struct person {
   struct person *parents[2];
   char alleles[2];
 } person;
-
-const int GENERATIONS = 3;
-const int INDENT_LENGTH = 4;
 
 person *create_family(int generations);
 void print_family(person *p, int generation);
@@ -20,84 +48,54 @@ void free_family(person *p);
 char random_allele();
 
 int main(void) {
-  // Seed random number generator
-  srand(time(0));
+  srand(time(NULL));
 
-  // Create a new family with three generations
   person *p = create_family(GENERATIONS);
-
-  // Print family tree of blood types
   print_family(p, 0);
-
-  // Free memory
   free_family(p);
+
+  return 0;
 }
 
-// Create a new individual with `generations`
 person *create_family(int generations) {
-  // Allocate memory for new person
   person *newPerson = (person *)malloc(sizeof(person));
 
-  // If there are still generations left to create
   if (generations > 1) {
-    // Create two new parents for current person by recursively calling
-    // create_family
     person *parent0 = create_family(generations - 1);
     person *parent1 = create_family(generations - 1);
-
-    // Set parent pointers for current person
     newPerson->parents[0] = parent0;
     newPerson->parents[1] = parent1;
-
-    // Randomly assign current person's alleles based on the alleles of
-    // their parents
     newPerson->alleles[0] = parent0->alleles[rand() % 2];
     newPerson->alleles[1] = parent1->alleles[rand() % 2];
-  }
-
-  // If there are no generations left to create
-  else {
-    // Set parent pointers to NULL
+  } else {
     newPerson->parents[0] = NULL;
     newPerson->parents[1] = NULL;
-
-    // Randomly assign alleles
     newPerson->alleles[0] = random_allele();
     newPerson->alleles[1] = random_allele();
   }
 
-  // Return newly created person
   return newPerson;
 }
 
-// Free `p` and all ancestors of `p`.
 void free_family(person *p) {
-  // Handle base case
   if (p == NULL) {
     return;
   }
 
-  // Free parents recursively
   free_family(p->parents[0]);
   free_family(p->parents[1]);
-
-  // Free child
   free(p);
 }
 
-// Print each family member and their alleles.
 void print_family(person *p, int generation) {
-  // Handle base case
   if (p == NULL) {
     return;
   }
 
-  // Print indentation
   for (int i = 0; i < generation * INDENT_LENGTH; i++) {
     printf(" ");
   }
 
-  // Print person
   if (generation == 0) {
     printf("Child (Generation %i): blood type %c%c\n", generation,
            p->alleles[0], p->alleles[1]);
@@ -112,19 +110,11 @@ void print_family(person *p, int generation) {
            p->alleles[0], p->alleles[1]);
   }
 
-  // Print parents of current generation
   print_family(p->parents[0], generation + 1);
   print_family(p->parents[1], generation + 1);
 }
 
-// Randomly chooses a blood type allele.
 char random_allele() {
   int r = rand() % 3;
-  if (r == 0) {
-    return 'A';
-  } else if (r == 1) {
-    return 'B';
-  } else {
-    return 'O';
-  }
+  return (r == 0) ? 'A' : (r == 1) ? 'B' : 'O';
 }
