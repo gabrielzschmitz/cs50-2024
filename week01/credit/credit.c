@@ -1,22 +1,50 @@
+/*
+  Program Description:
+  --------------------
+  This C program, named credit.c, is located in the "credit" folder. It is
+  designed to check the validity of a given credit card number using the Luhn
+  algorithm. Credit card numbers typically have specific characteristics, such
+  as length and initial digits, depending on the issuing company (e.g., American
+  Express, Visa, MasterCard).
+
+  Implementation Details:
+  -----------------------
+  - The program prompts the user for a credit card number and performs various
+  checks to determine its validity.
+  - It uses a function checkSize to verify the size of the credit card number
+  and its initial digit, adhering to the conventions of different card issuers
+  (e.g., American Express, Visa, MasterCard).
+  - The Luhn algorithm is implemented in the function luhnAlgorithm to calculate
+  the checksum and verify the mathematical relationship between the digits.
+  - The program uses a function printType to identify and print the type of
+  credit card (e.g., AMEX, VISA, MASTERCARD) based on the card's
+  characteristics.
+  - Dynamic memory allocation is utilized to store the credit card number using
+  malloc, and proper error checks are performed to handle memory allocation
+  failures.
+  - The program continuously prompts the user for a valid credit card number
+  until a valid input is provided.
+  - After obtaining a valid credit card number, the program checks its validity
+  using the Luhn algorithm and prints the type of credit card if valid;
+  otherwise, it outputs "INVALID."
+
+  Usage Example:
+  --------------
+  Suppose the user enters the credit card number "378282246310005" in response
+  to the prompt. The program will output: "AMEX"
+
+  Note: Ensure proper compilation and execution for the desired functionality.
+*/
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define BUFFERSIZE 20
 
 int checkSize(char *creditCardNumber) {
-  int size = -1;
-  size = strlen(creditCardNumber);
-  if (creditCardNumber[0] < 0 || creditCardNumber[0] < 9)
-    return -1;
-  switch (size) {
-  case 13:
-    break;
-  case 15:
-    break;
-  case 16:
-    break;
-  default:
-    return -1;
-  }
+  int size = strlen(creditCardNumber);
+  if (size != 13 && size != 15 && size != 16) return -1;
+  if (creditCardNumber[0] < '1' || creditCardNumber[0] > '9') return -1;
+
   return size;
 }
 
@@ -52,7 +80,8 @@ void printType(char *creditCardNumber, int size) {
 }
 
 int main(void) {
-  char creditCardNumber[BUFFERSIZE];
+  char *creditCardNumber = (char *)malloc(sizeof(char) * BUFFERSIZE);
+  if (!creditCardNumber) return 1;
 
   int size = 0;
   while (size == 0) {
@@ -62,15 +91,18 @@ int main(void) {
     size = checkSize(creditCardNumber);
     if (size == -1) {
       printf("INVALID\n");
+      free(creditCardNumber);
       return 0;
     }
   }
 
   if (luhnAlgorithm(creditCardNumber, size) % 10 != 0) {
     printf("INVALID\n");
+    free(creditCardNumber);
     return 0;
   }
 
   printType(creditCardNumber, size);
+  free(creditCardNumber);
   return 0;
 }
