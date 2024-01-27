@@ -1,5 +1,35 @@
+/*
+  Program Description:
+  --------------------
+  This C program, named tideman.c, simulates an election using the Tideman
+  voting method (ranked pairs). The Tideman method is a ranked-choice voting
+  system that guarantees the Condorcet winner if one exists. The program
+  collects ranked preferences from voters, calculates pairwise preferences,
+  sorts the pairs based on preference differences, and determines the winner
+  without creating cycles in the preferences.
+
+  Implementation Details:
+  -----------------------
+  - The program defines a pair structure to represent a pairwise comparison
+  between candidates.
+  - Arrays are used to store candidate names, preferences, locked pairs, and
+  pairs sorted by preference differences.
+  - Functions are implemented to register votes, record preferences, add pairs,
+  sort pairs, lock pairs without creating cycles, and print the winner.
+  - The main function collects voter preferences, calculates and sorts pairs,
+  locks pairs, and prints the winner.
+
+  Usage Example:
+  --------------
+  Suppose the user executes the program with the following command:
+  ./tideman Alice Bob Charlie
+  The program prompts for the number of voters and collects ranked preferences
+  for each candidate. After processing the preferences, it outputs the winner(s)
+  according to the Tideman voting method.
+
+  Note: Ensure proper compilation and execution for the desired functionality.
+*/
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define BUFFERSIZE 100
@@ -36,15 +66,10 @@ int main(int argc, char *argv[]) {
     printf("Maximum number of candidates is %i\n", MAX);
     return 2;
   }
-  for (int i = 0; i < candidate_count; i++) {
-    candidates[i] = argv[i + 1];
-  }
+  for (int i = 0; i < candidate_count; i++) candidates[i] = argv[i + 1];
 
-  for (int i = 0; i < candidate_count; i++) {
-    for (int j = 0; j < candidate_count; j++) {
-      locked[i][j] = 0;
-    }
-  }
+  for (int i = 0; i < candidate_count; i++)
+    for (int j = 0; j < candidate_count; j++) locked[i][j] = 0;
 
   pair_count = 0;
   int voter_count = -1;
@@ -55,7 +80,7 @@ int main(int argc, char *argv[]) {
     int ranks[candidate_count];
 
     for (int j = 0; j < candidate_count; j++) {
-      char *name = (char *)malloc(sizeof(char *) * BUFFERSIZE);
+      char name[BUFFERSIZE];
       printf("Rank %d: ", j + 1);
       scanf("%s", name);
 
@@ -64,7 +89,6 @@ int main(int argc, char *argv[]) {
         return 3;
       }
     }
-
     record_preferences(ranks);
 
     printf("\n");
@@ -112,34 +136,27 @@ void add_pairs(void) {
 }
 
 void sort_pairs(void) {
-  int index = 0;
-
   for (int i = 0; i < pair_count; i++) {
-    index = i;
     for (int j = i + 1; j < pair_count; j++) {
-      int strength_of_victory =
-        preferences[pairs[index].winner][pairs[index].loser] -
-        preferences[pairs[index].loser][pairs[index].winner];
-      int current_high = preferences[pairs[j].winner][pairs[j].loser] -
-                         preferences[pairs[j].loser][pairs[j].winner];
-      if (current_high > strength_of_victory) {
-        index = j;
+      int diff1 = preferences[pairs[i].winner][pairs[i].loser] -
+                  preferences[pairs[i].loser][pairs[i].winner];
+      int diff2 = preferences[pairs[j].winner][pairs[j].loser] -
+                  preferences[pairs[j].loser][pairs[j].winner];
+
+      if (diff1 < diff2) {
+        pair temp = pairs[i];
+        pairs[i] = pairs[j];
+        pairs[j] = temp;
       }
     }
-    pair temp = pairs[i];
-    pairs[i] = pairs[index];
-    pairs[index] = temp;
   }
   return;
 }
 
 void lock_pairs(void) {
-  for (int i = 0; i < pair_count; i++) {
-    if (check_loop(pairs[i].winner, pairs[i].loser))
-      continue;
-    else
+  for (int i = 0; i < pair_count; i++)
+    if (!check_loop(pairs[i].winner, pairs[i].loser))
       locked[pairs[i].winner][pairs[i].loser] = 1;
-  }
   return;
 }
 

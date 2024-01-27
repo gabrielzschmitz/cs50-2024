@@ -1,5 +1,35 @@
+/*
+  Program Description:
+  --------------------
+  This C program, named plurality.c, implements a plurality election. The
+  program runs a simple election where voters vote for one candidate each, and
+  the candidate with the highest number of votes is declared the winner.
+
+  Implementation Details:
+  -----------------------
+  - The program defines a candidate structure with attributes "name" and
+  "votes."
+  - The main function initializes an array of candidates based on the
+  command-line arguments, sets their initial votes to 0, and prompts the user
+  for the number of voters.
+  - The vote function takes a voter's choice and increments the vote count for
+  the corresponding candidate.
+  - The print_winner function determines and prints the winner(s) by identifying
+  the candidate(s) with the highest number of votes.
+
+  Usage Example:
+  --------------
+  Suppose the user executes the program with the following command:
+  ./plurality Alice Bob Charlie
+  The program prompts for the number of voters, and if the user enters "3" and
+  votes for Alice, Bob, and Charlie, the program outputs:
+  "Alice\n"
+  "Bob\n"
+  "Charlie\n"
+
+  Note: Ensure proper compilation and execution for the desired functionality.
+*/
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define BUFFERSIZE 100
@@ -15,7 +45,6 @@ candidate candidates[MAX];
 int candidate_count;
 
 int vote(char *name);
-void print_votes(void);
 void print_winner(void);
 
 int main(int argc, char *argv[]) {
@@ -39,16 +68,13 @@ int main(int argc, char *argv[]) {
   scanf("%d", &voter_count);
 
   for (int i = 0; i < voter_count; i++) {
-    char *name = (char *)malloc(sizeof(char *) * BUFFERSIZE);
+    char name[BUFFERSIZE];
     printf("Vote: ");
     scanf("%s", name);
 
-    if (!vote(name)) {
-      printf("Invalid vote.\n");
-    }
+    if (!vote(name)) printf("Invalid vote.\n");
   }
 
-  // print_votes();
   print_winner();
   return 0;
 }
@@ -60,14 +86,6 @@ int vote(char *name) {
       return 1;
     }
   return 0;
-}
-
-void print_votes(void) {
-  printf("\n");
-  for (int i = 0; i < candidate_count; i++)
-    printf("NAME: %s; VOTES: %d\n", candidates[i].name, candidates[i].votes);
-  printf("\n");
-  return;
 }
 
 void print_winner(void) {

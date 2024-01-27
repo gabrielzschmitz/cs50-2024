@@ -1,5 +1,36 @@
+/*
+  Program Description:
+  --------------------
+  This C program, named runoff.c, simulates a ranked-choice voting (instant
+  runoff) election. The program allows voters to rank candidates in order of
+  preference, and it iteratively eliminates candidates with the fewest votes
+  until a candidate receives more than 50% of the votes.
+
+  Implementation Details:
+  -----------------------
+  - The program defines a candidate structure with attributes "name," "votes,"
+  and "eliminated."
+  - An array 'preferences' is used to store the ranked preferences of each
+  voter.
+  - The main function initializes the candidates based on command-line
+  arguments, prompts for the number of voters, and collects the ranked
+  preferences from each voter.
+  - The program iteratively tabulates votes, checks for a winner, finds the
+  candidate with the fewest votes, and eliminates candidates in case of a tie.
+  - The simulation continues until a candidate receives more than 50% of the
+  votes or a tie occurs.
+
+  Usage Example:
+  --------------
+  Suppose the user executes the program with the following command:
+  ./runoff Alice Bob Charlie
+  The program prompts for the number of voters, and if the user enters "3" and
+  provides ranked preferences for each candidate, the program outputs the winner
+  or a tie result.
+
+  Note: Ensure proper compilation and execution for the desired functionality.
+*/
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define BUFFERSIZE     100
@@ -18,7 +49,6 @@ int voter_count;
 int candidate_count;
 
 int vote(int voter, int rank, char *name);
-void print_votes(void);
 void tabulate(void);
 int print_winner(void);
 int find_min(void);
@@ -52,7 +82,7 @@ int main(int argc, char *argv[]) {
 
   for (int i = 0; i < voter_count; i++) {
     for (int j = 0; j < candidate_count; j++) {
-      char *name = (char *)malloc(sizeof(char *) * BUFFERSIZE);
+      char name[BUFFERSIZE];
       printf("Rank %d: ", j + 1);
       scanf("%s", name);
 
@@ -75,21 +105,15 @@ int main(int argc, char *argv[]) {
     int tie = is_tie(min);
 
     if (tie) {
-      for (int i = 0; i < candidate_count; i++) {
-        if (!candidates[i].eliminated) {
-          printf("%s\n", candidates[i].name);
-        }
-      }
+      for (int i = 0; i < candidate_count; i++)
+        if (!candidates[i].eliminated) printf("%s\n", candidates[i].name);
       break;
     }
 
     eliminate(min);
 
-    for (int i = 0; i < candidate_count; i++) {
-      candidates[i].votes = 0;
-    }
+    for (int i = 0; i < candidate_count; i++) candidates[i].votes = 0;
   }
-  // print_votes();
   return 0;
 }
 
@@ -102,19 +126,11 @@ int vote(int voter, int rank, char *name) {
   return 0;
 }
 
-void print_votes(void) {
-  printf("\n");
-  for (int i = 0; i < candidate_count; i++)
-    printf("NAME: %s; VOTES: %d\n", candidates[i].name, candidates[i].votes);
-  printf("\n");
-  return;
-}
-
 void tabulate(void) {
   for (int i = 0; i < voter_count; i++) {
     for (int j = 0; j < candidate_count; j++) {
       int c = preferences[i][j];
-      if (candidates[c].eliminated == 0) {
+      if (!candidates[c].eliminated) {
         candidates[c].votes++;
         break;
       }
@@ -134,14 +150,10 @@ int print_winner(void) {
 
 int find_min(void) {
   int minimum = MAX_VOTERS;
-  int minimumCandidate = -1;
-  for (int i = 0; i < candidate_count; i++) {
-    if (candidates[i].votes < minimum && !candidates[i].eliminated) {
+  for (int i = 0; i < candidate_count; i++)
+    if (candidates[i].votes < minimum && !candidates[i].eliminated)
       minimum = candidates[i].votes;
-    }
-  }
-  if (minimum != MAX_VOTERS) return minimum;
-  return 0;
+  return minimum;
 }
 
 int is_tie(int min) {
@@ -152,10 +164,7 @@ int is_tie(int min) {
     if (candidates[i].votes == min && !candidates[i].eliminated)
       candidatesTied += 1;
   }
-  if (candidatesTied == candidatesRemaining)
-    return 1;
-  else
-    return 0;
+  return candidatesTied == candidatesRemaining;
 }
 
 void eliminate(int min) {
