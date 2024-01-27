@@ -1,31 +1,51 @@
+"""
+Program Description:
+--------------------
+The cash.py program, located in the sentimental-cash folder, is designed to
+prompt the user for an amount of change owed in dollars and determine the
+minimum number of coins required to make that change. The user inputs the change
+owed in dollars (e.g., 0.50 dollars instead of 50 cents), and the program
+calculates the optimal distribution of quarters, dimes, nickels, and pennies.
+
+Implementation Details:
+-----------------------
+- The count_change function takes the total cents and a coin value and returns
+the number of coins of that denomination and the remaining cents after
+calculating the change.
+- The program continuously prompts the user for input until a non-negative
+numeric value is provided.
+- The provided dollars input is converted to cents (rounded) for further
+calculations.
+- The count_change function is used to determine the number of quarters, dimes,
+nickels, and pennies required.
+- The program prints the total number of coins needed to make the given change.
+
+Usage:
+------
+Execute the program by running the command: python cash.py
+
+Note: The user should input the change owed in dollars when prompted.
+"""
+
+
 def count_change(cents, coin):
-    count = 0
-    while cents >= coin:
-        cents -= coin
-        count += 1
-    return count
+    return cents // coin, cents % coin
 
 
 while True:
     try:
-        cents = float(input("Change owed: "))
-        if cents >= 0:
+        dollars = float(input("Change owed: "))
+        if dollars >= 0:
             break
     except ValueError:
         print("Invalid input. Please enter a non-negative numeric value.")
 
-cents = round(cents * 100)  # Convert dollars to cents
+cents = round(dollars * 100)
 
-quarters = count_change(cents, 25)
-cents -= quarters * 25
-
-dimes = count_change(cents, 10)
-cents -= dimes * 10
-
-nickels = count_change(cents, 5)
-cents -= nickels * 5
-
-pennies = count_change(cents, 1)
+quarters, cents = count_change(cents, 25)
+dimes, cents = count_change(cents, 10)
+nickels, cents = count_change(cents, 5)
+pennies = cents
 
 change_amount = quarters + dimes + nickels + pennies
 print(change_amount)
