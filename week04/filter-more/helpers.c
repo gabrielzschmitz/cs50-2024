@@ -8,20 +8,20 @@ void blur(int height, int width, RGBTRIPLE image[height][width]) {
 
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      float sumRed = 0;
-      float sumGreen = 0;
-      float sumBlue = 0;
-      float counter = 0;
+      float sumRed = 0, sumGreen = 0, sumBlue = 0;
+      int counter = 0;
 
-      for (int r = -1; r < 2; r++) {
-        for (int c = -1; c < 2; c++) {
-          if (i + r < 0 || i + r > height - 1) continue;
-          if (j + c < 0 || j + c > width - 1) continue;
+      for (int r = -1; r <= 1; r++) {
+        for (int c = -1; c <= 1; c++) {
+          int ni = i + r;
+          int nj = j + c;
 
-          sumRed += image[i + r][j + c].rgbtRed;
-          sumGreen += image[i + r][j + c].rgbtGreen;
-          sumBlue += image[i + r][j + c].rgbtBlue;
-          counter++;
+          if (ni >= 0 && ni < height && nj >= 0 && nj < width) {
+            sumRed += image[ni][nj].rgbtRed;
+            sumGreen += image[ni][nj].rgbtGreen;
+            sumBlue += image[ni][nj].rgbtBlue;
+            counter++;
+          }
         }
       }
 
@@ -31,15 +31,12 @@ void blur(int height, int width, RGBTRIPLE image[height][width]) {
     }
   }
 
+  // Update the original image with the blurred values
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      image[i][j].rgbtRed = temp[i][j].rgbtRed;
-      image[i][j].rgbtGreen = temp[i][j].rgbtGreen;
-      image[i][j].rgbtBlue = temp[i][j].rgbtBlue;
+      image[i][j] = temp[i][j];
     }
   }
-
-  return;
 }
 
 // Detect edges
@@ -51,24 +48,22 @@ void edges(int height, int width, RGBTRIPLE image[height][width]) {
 
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      int gxRed = 0;
-      int gyRed = 0;
-      int gxGreen = 0;
-      int gyGreen = 0;
-      int gxBlue = 0;
-      int gyBlue = 0;
+      int gxRed = 0, gyRed = 0, gxGreen = 0, gyGreen = 0, gxBlue = 0,
+          gyBlue = 0;
 
-      for (int r = -1; r < 2; r++) {
-        for (int c = -1; c < 2; c++) {
-          if (i + r < 0 || i + r > height - 1) continue;
-          if (j + c < 0 || j + c > width - 1) continue;
+      for (int r = -1; r <= 1; r++) {
+        for (int c = -1; c <= 1; c++) {
+          int ni = i + r;
+          int nj = j + c;
 
-          gxRed += image[i + r][j + c].rgbtRed * gx[r + 1][c + 1];
-          gyRed += image[i + r][j + c].rgbtRed * gy[r + 1][c + 1];
-          gxGreen += image[i + r][j + c].rgbtGreen * gx[r + 1][c + 1];
-          gyGreen += image[i + r][j + c].rgbtGreen * gy[r + 1][c + 1];
-          gxBlue += image[i + r][j + c].rgbtBlue * gx[r + 1][c + 1];
-          gyBlue += image[i + r][j + c].rgbtBlue * gy[r + 1][c + 1];
+          if (ni >= 0 && ni < height && nj >= 0 && nj < width) {
+            gxRed += image[ni][nj].rgbtRed * gx[r + 1][c + 1];
+            gyRed += image[ni][nj].rgbtRed * gy[r + 1][c + 1];
+            gxGreen += image[ni][nj].rgbtGreen * gx[r + 1][c + 1];
+            gyGreen += image[ni][nj].rgbtGreen * gy[r + 1][c + 1];
+            gxBlue += image[ni][nj].rgbtBlue * gx[r + 1][c + 1];
+            gyBlue += image[ni][nj].rgbtBlue * gy[r + 1][c + 1];
+          }
         }
       }
 
@@ -82,48 +77,33 @@ void edges(int height, int width, RGBTRIPLE image[height][width]) {
     }
   }
 
+  // Update the original image with the edge-detected values
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      image[i][j].rgbtRed = temp[i][j].rgbtRed;
-      image[i][j].rgbtGreen = temp[i][j].rgbtGreen;
-      image[i][j].rgbtBlue = temp[i][j].rgbtBlue;
+      image[i][j] = temp[i][j];
     }
   }
-
-  return;
 }
 
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width]) {
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      int rgbt = round(
+      int avg = round(
         (image[i][j].rgbtRed + image[i][j].rgbtGreen + image[i][j].rgbtBlue) /
         3.0);
-      image[i][j].rgbtRed = image[i][j].rgbtGreen = image[i][j].rgbtBlue = rgbt;
+      image[i][j].rgbtRed = image[i][j].rgbtGreen = image[i][j].rgbtBlue = avg;
     }
   }
-  return;
 }
 
 // Reflect image horizontally
 void reflect(int height, int width, RGBTRIPLE image[height][width]) {
   for (int i = 0; i < height; i++) {
-    if (width % 2 == 0) {
-      for (int j = 0; j < width / 2; j++) {
-        RGBTRIPLE temp[height][width];
-        temp[i][j] = image[i][j];
-        image[i][j] = image[i][width - (j + 1)];
-        image[i][width - (j + 1)] = temp[i][j];
-      }
-    } else {
-      for (int j = 0; j < (width - 1) / 2; j++) {
-        RGBTRIPLE temp[height][width];
-        temp[i][j] = image[i][j];
-        image[i][j] = image[i][width - (j + 1)];
-        image[i][width - (j + 1)] = temp[i][j];
-      }
+    for (int j = 0; j < width / 2; j++) {
+      RGBTRIPLE temp = image[i][j];
+      image[i][j] = image[i][width - 1 - j];
+      image[i][width - 1 - j] = temp;
     }
   }
-  return;
 }
