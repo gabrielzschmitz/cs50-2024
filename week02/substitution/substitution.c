@@ -41,7 +41,7 @@ int charactersOnly(const char *string) {
   return 1;
 }
 
-char *caesar(char *plaintext, char *key) {
+char *substitution(char *plaintext, char *key) {
   int length = strlen(plaintext);
   char *cypherText = (char *)malloc(length + 1);
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   printf("plaintext:  ");
   scanf("%[^\n]", plainText);
 
-  char *cipherText = caesar(plainText, key);
+  char *cipherText = substitution(plainText, key);
   printf("ciphertext: %s\n", cipherText);
 
   free(cipherText);
